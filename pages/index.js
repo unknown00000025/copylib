@@ -49,7 +49,10 @@ export default function Home() {
     try {
       // Analyze
       const aRes = await fetch('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content: newCopy.content }) });
-      const analysis = await aRes.json();
+const aText = await aRes.text();
+if (!aRes.ok) { showToast(`AI分析失败: ${aText}`, 'error'); setAnalyzing(false); return; }
+let analysis = {};
+try { analysis = JSON.parse(aText); } catch(e) { showToast(`解析失败: ${aText.slice(0,100)}`, 'error'); setAnalyzing(false); return; }
       if (!aRes.ok) { showToast(`AI分析失败: ${analysis.error}`, 'error'); setAnalyzing(false); return; }
 
       // Save
