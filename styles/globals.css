@@ -1,0 +1,4 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; background: #F7F6F3; color: #1A1A1A; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #DDD; border-radius: 2px; }
