@@ -1,7 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -30,14 +26,30 @@ export default async function handler(req, res) {
 }`;
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: `文案内容：\n${content}` }],
+    const resp = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `文案内容：\n${content}` }
+        ],
+        max_tokens: 1024,
+      }),
     });
 
-    const text = message.content[0].text;
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      console.error('DeepSeek error:', data);
+      return res.status(500).json({ error: data?.error?.message || 'AI分析失败' });
+    }
+
+    const text = data.choices?.[0]?.message?.content || '{}';
     const clean = text.replace(/```json|```/g, '').trim();
     const result = JSON.parse(clean);
     return res.status(200).json(result);
